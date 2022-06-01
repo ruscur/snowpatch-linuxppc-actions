@@ -152,12 +152,12 @@ jobs:
             old-image: korg-5.5.0
             new-image: fedora-34
 
-          - defconfig: pmac32_defconfig
-            machine: mac99
-            packages: qemu-system-ppc openbios-ppc
-            rootfs: ppc-rootfs.cpio.gz
-            old-image: korg-5.5.0
-            new-image: fedora-34
+#          - defconfig: pmac32_defconfig
+#            machine: mac99
+#            packages: qemu-system-ppc openbios-ppc
+#            rootfs: ppc-rootfs.cpio.gz
+#            old-image: korg-5.5.0
+#            new-image: fedora-34
 
     steps:
     - uses: actions/checkout@v2
