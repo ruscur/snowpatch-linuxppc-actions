@@ -26,12 +26,12 @@ jobs:
     strategy:
       matrix:
         defconfig: [ppc64, pmac32, mpc885_ads_defconfig]
-        image: [ubuntu-21.10]
+        image: [ubuntu-22.04]
         subarch: [ppc64]
         include:
           - subarch: ppc64le
             defconfig: ppc64le
-            image: ubuntu-21.10
+            image: ubuntu-22.04
 
     env:
       ARCH: powerpc
