@@ -82,28 +82,33 @@ jobs:
     env:
       ARCH: powerpc
       TARGET: kernel
+      CCACHE: 1
       SUBARCH: ${{ matrix.subarch }}
       IMAGE: ${{ matrix.image }}
       DEFCONFIG: ${{ matrix.defconfig }}
       MERGE_CONFIG: ${{ matrix.merge_config }}
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
+
+    - name: Register problem matchers
+      run: |
+        echo "::add-matcher::.github/problem-matchers/compiler-source.json"
+        echo "::add-matcher::.github/problem-matchers/compiler-non-source.json"
 
     - name: Load ccache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: ~/.ccache
         key: ${{ matrix.image }}-${{ matrix.subarch }}-${{ matrix.defconfig }}
 
-    - name: build
+    - name: Build
       run: |
         mkdir -p ~/.ccache
-        ls -l ~/.ccache
-        CCACHE=1 ./arch/powerpc/tools/ci-build.sh
+        ./arch/powerpc/tools/ci-build.sh
 
     - name: Archive artifacts
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: ${{ matrix.defconfig }}-${{ matrix.image }}
         path: |
@@ -160,7 +165,7 @@ jobs:
             new-image: ubuntu-22.04
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         repository: linuxppc/ci-scripts
 
@@ -176,9 +181,12 @@ jobs:
     - name: Install dependencies
       run: sudo apt install -y ${{ matrix.packages }} python3-pexpect python3-termcolor python3-yaml
 
-    - uses: actions/download-artifact@v2
+    - uses: actions/download-artifact@v3
       with:
         name: ${{ matrix.defconfig }}-${{ matrix.new-image }}
+
+    - name: Disable network tests
+      run: echo "QEMU_NET_TESTS=0" >> $GITHUB_ENV
 
     - name: Run qemu-${{ matrix.machine }} with ${{ matrix.new-image }} build kernel
       run: ./scripts/boot/qemu-${{ matrix.machine }}
@@ -187,7 +195,7 @@ jobs:
       run: ./scripts/boot/qemu-${{ matrix.machine_2 }}
       if: matrix.machine_2 != ''
 
-    - uses: actions/download-artifact@v2
+    - uses: actions/download-artifact@v3
       with:
         name: ${{ matrix.defconfig }}-${{ matrix.old-image }}
 

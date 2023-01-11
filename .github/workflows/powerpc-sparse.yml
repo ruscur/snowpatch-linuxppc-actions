@@ -36,6 +36,7 @@ jobs:
     env:
       ARCH: powerpc
       TARGET: kernel
+      CCACHE: 1
       SPARSE: 2
       SUBARCH: ${{ matrix.subarch }}
       IMAGE: ${{ matrix.image }}
@@ -43,10 +44,15 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
+
+    - name: Register problem matchers
+      run: |
+        echo "::add-matcher::.github/problem-matchers/compiler-source.json"
+        echo "::add-matcher::.github/problem-matchers/compiler-non-source.json"
 
     - name: Load ccache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: ~/.ccache
         key: ${{ matrix.image }}-${{ matrix.subarch }}-${{ matrix.defconfig }}
@@ -54,8 +60,7 @@ jobs:
     - name: Build
       run: |
         mkdir -p ~/.ccache
-        ls -l ~/.ccache
-        CCACHE=1 ./arch/powerpc/tools/ci-build.sh
+        ./arch/powerpc/tools/ci-build.sh
 
     - name: Get sparse results from base tree
       continue-on-error: true
@@ -77,7 +82,7 @@ jobs:
         python3 smart-sparse-diff.py ~/base_logs/sparse.log ~/output/sparse.log | tee -a ~/output/sparse-diff.log
 
     - name: Archive artifacts
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: sparse-${{ matrix.defconfig }}-${{ matrix.image }}.log
         path: |
