@@ -14,8 +14,6 @@ jobs:
   kernel:
     runs-on: ubuntu-latest
 
-    continue-on-error: true
-
     strategy:
       fail-fast: false
       matrix:
@@ -23,26 +21,26 @@ jobs:
           # ppc64le allmod and allyes
           - subarch: ppc64le
             defconfig: ppc64le_allmodconfig
-            image: ubuntu-22.04
+            image: fedora-37
           - subarch: ppc64le
             defconfig: allmodconfig
-            image: ubuntu-22.04
+            image: fedora-37
             merge_config: /linux/arch/powerpc/configs/le.config
           # ppc64 allmod and allyes
           - subarch: ppc64
             defconfig: allmodconfig
-            image: ubuntu-22.04
+            image: fedora-37
           - subarch: ppc64
             defconfig: allyesconfig
-            image: ubuntu-22.04
+            image: fedora-37
           # ppc32 allmod
           - subarch: ppc
             defconfig: ppc32_allmodconfig
-            image: ubuntu-22.04
+            image: fedora-37
           # ppc64 book3e allmod
           - subarch: ppc64
             defconfig: ppc64_book3e_allmodconfig
-            image: ubuntu-22.04
+            image: fedora-37
 
     env:
       ARCH: powerpc
@@ -66,6 +64,13 @@ jobs:
       with:
         path: ~/.ccache
         key: ${{ matrix.image }}-${{ matrix.subarch }}-${{ matrix.defconfig }}
+
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build
       run: |
